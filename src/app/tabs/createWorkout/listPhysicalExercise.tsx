@@ -1,15 +1,7 @@
-// ListPhysicalExercise.tsx
 import { ExerciseItem } from '@/components/createWorkout/ExeciseItem'
-import { db } from '@/config/firebaseConfig'
-import {
-	setError,
-	setExercises,
-	setLoading,
-} from '@/store/slices/exerciseSlice'
-import { useAppSelector } from '@/store/store'
+import { useFetchExercises } from '@/hooks/useFetchExercises'
+
 import { useRouter } from 'expo-router'
-import { onValue, ref } from 'firebase/database'
-import React, { useEffect } from 'react'
 import {
 	Alert,
 	FlatList,
@@ -18,14 +10,9 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native'
-import { useDispatch } from 'react-redux'
 
 export default function ListPhysicalExercise() {
-	const dispatch = useDispatch()
-	const userId = useAppSelector((state) => state.user.uid)
-	const exercises = useAppSelector((state) => state.exercise.exercises)
-	const loading = useAppSelector((state) => state.exercise.loading)
-	const error = useAppSelector((state) => state.exercise.error)
+	const { exercises, loading, error } = useFetchExercises()
 	const router = useRouter()
 
 	const handleVideoPress = (url: string) => {
@@ -33,35 +20,6 @@ export default function ListPhysicalExercise() {
 			Alert.alert('Erro', 'Não foi possível abrir o vídeo.'),
 		)
 	}
-
-	useEffect(() => {
-		dispatch(setLoading(true))
-		const exercisesRef = ref(db, `exercises/${userId}`)
-		const getExercises = onValue(
-			exercisesRef,
-			(snapshot) => {
-				const data = snapshot.val()
-				if (data) {
-					const exercisesList = Object.keys(data).map((key) => ({
-						id: key,
-						...data[key],
-					}))
-					dispatch(setExercises(exercisesList))
-				} else {
-					dispatch(setExercises([]))
-				}
-			},
-			(error) => {
-				dispatch(setError('Erro ao carregar exercícios'))
-				console.error('Erro ao carregar exercícios:', error)
-			},
-		)
-		return () => {
-			dispatch(setLoading(false))
-			getExercises()
-		}
-	}, [dispatch, userId])
-
 	return (
 		<View className="flex-1 bg-gray-100 p-5">
 			{loading ? (

@@ -1,10 +1,12 @@
+import { ModalSelectExerciseToCreateWorkout } from '@/components/createWorkout/ModalSelectExerciseToCreateWorkout'
+import { db } from '@/config/firebaseConfig'
+import { useAppSelector } from '@/store/store'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { push, ref, set } from 'firebase/database'
 import { useEffect, useState } from 'react'
 import { Controller, useFieldArray, useForm } from 'react-hook-form'
 import {
 	Alert,
-	Button,
-	Modal,
 	ScrollView,
 	Text,
 	TextInput,
@@ -20,7 +22,11 @@ const workoutSchema = z.object({
 			z.object({
 				repetitions: z.string().min(1, 'Repetições são obrigatórias'),
 				series: z.string().min(1, 'Séries são obrigatórias'),
-				selectedExercise: z.string().min(1, 'Selecione um exercício'),
+				videoReference: z
+					.string()
+					.url('URL inválida')
+					.min(1, 'URL é obrigatória'),
+				name: z.string().min(1, 'Selecione um exercício'),
 			}),
 		)
 		.refine((exercises) => exercises.length > 0, {
@@ -31,6 +37,8 @@ const workoutSchema = z.object({
 type WorkoutFormData = z.infer<typeof workoutSchema>
 
 const CreateWorkoutForm = () => {
+	const userId = useAppSelector((state) => state.user.uid)
+
 	const {
 		control,
 		handleSubmit,
@@ -40,7 +48,9 @@ const CreateWorkoutForm = () => {
 		resolver: zodResolver(workoutSchema),
 		defaultValues: {
 			workoutName: '',
-			exercises: [{ repetitions: '', series: '', selectedExercise: '' }],
+			exercises: [
+				{ repetitions: '', series: '', name: '', videoReference: '' },
+			],
 		},
 	})
 
@@ -52,31 +62,52 @@ const CreateWorkoutForm = () => {
 	const [modalVisible, setModalVisible] = useState(false)
 	const [currentIndex, setCurrentIndex] = useState<number | null>(null)
 
-	const onSubmit = (data: WorkoutFormData) => {
-		console.log(data)
-		Alert.alert(
-			'Treino cadastrado com sucesso! \n',
-			JSON.stringify(data, null, 2),
-		)
-		reset()
+	const onSubmit = async (data: WorkoutFormData) => {
+		try {
+			const { workoutName, exercises } = data
+			const workoutsRef = ref(db, `workouts/${userId}`)
+			const newWorkoutRef = push(workoutsRef)
+
+			await set(newWorkoutRef, {
+				workoutName,
+				exercises,
+			})
+
+			Alert.alert('Sucesso', 'Treino cadastrado com sucesso!')
+			reset()
+		} catch (error) {
+			console.error('Erro ao cadastrar treino:', error)
+			Alert.alert('Erro', 'Não foi possível realizar o cadastro')
+		}
 	}
 
 	const handleAddExercise = () => {
-		append({ repetitions: '', series: '', selectedExercise: '' })
+		append({ repetitions: '', series: '', name: '', videoReference: '' })
 	}
 
-	const handleExerciseSelect = (exercise: string) => {
+	const handleExerciseSelect = (name: string, videoReference: string) => {
+		console.log(name, videoReference)
+
 		if (currentIndex !== null) {
 			const { repetitions, series } =
 				control._formValues.exercises[currentIndex] || {}
-			update(currentIndex, { repetitions, series, selectedExercise: exercise })
+			update(currentIndex, {
+				repetitions,
+				series,
+				name,
+				videoReference,
+			})
 		}
 		setModalVisible(false)
 	}
 
+	useEffect(() => {
+		console.log(errors, 'errors')
+	}, [errors])
+
 	return (
 		<View className="flex-1 p-5 pt-0 bg-gray-100">
-			<ScrollView className="flex-1 mt-5">
+			<ScrollView className="flex-1 pt-5">
 				<View className="mb-4">
 					<Controller
 						control={control}
@@ -88,6 +119,7 @@ const CreateWorkoutForm = () => {
 								onChangeText={onChange}
 								value={value}
 								placeholder="Nome do Treino"
+								keyboardType="number-pad"
 							/>
 						)}
 					/>
@@ -109,12 +141,12 @@ const CreateWorkoutForm = () => {
 								activeOpacity={0.8}
 							>
 								<Text className="text-white">
-									{item.selectedExercise || 'Selecionar exercício aqui'}
+									{item.name || 'Selecionar exercício aqui'}
 								</Text>
 							</TouchableOpacity>
-							{errors.exercises?.[index]?.selectedExercise && (
+							{errors.exercises?.[index]?.name && (
 								<Text className="text-red-500">
-									{errors.exercises[index].selectedExercise.message}
+									{errors.exercises[index].name.message}
 								</Text>
 							)}
 							<View className="flex-row gap-2">
@@ -191,39 +223,11 @@ const CreateWorkoutForm = () => {
 				</TouchableOpacity>
 			</View>
 
-			<Modal
-				animationType="slide"
-				transparent={true}
-				visible={modalVisible}
-				onRequestClose={() => setModalVisible((s) => !s)}
-			>
-				<View className="flex-1 justify-center items-center bg-gray-800 bg-opacity-50">
-					<View className="bg-white p-5 rounded-lg">
-						<Text className="text-lg font-bold mb-4">
-							Selecione um Exercício
-						</Text>
-						<TouchableOpacity
-							onPress={() => handleExerciseSelect('Agachamento')}
-							className="p-2 border-b border-gray-300"
-						>
-							<Text>Agachamento</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							onPress={() => handleExerciseSelect('Flexão')}
-							className="p-2 border-b border-gray-300"
-						>
-							<Text>Flexão</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							onPress={() => handleExerciseSelect('Supino')}
-							className="p-2 border-b border-gray-300"
-						>
-							<Text>Supino</Text>
-						</TouchableOpacity>
-						<Button title="Fechar" onPress={() => setModalVisible(false)} />
-					</View>
-				</View>
-			</Modal>
+			<ModalSelectExerciseToCreateWorkout
+				handleExerciseSelect={handleExerciseSelect}
+				modalVisible={modalVisible}
+				setModalVisible={() => setModalVisible((s) => !s)}
+			/>
 		</View>
 	)
 }
