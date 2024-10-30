@@ -36,6 +36,8 @@ const workoutSchema = z.object({
 
 type WorkoutFormData = z.infer<typeof workoutSchema>
 
+//TODO create slice to workout and hook to create workout
+
 const CreateWorkoutForm = () => {
 	const userId = useAppSelector((state) => state.user.uid)
 
@@ -86,8 +88,6 @@ const CreateWorkoutForm = () => {
 	}
 
 	const handleExerciseSelect = (name: string, videoReference: string) => {
-		console.log(name, videoReference)
-
 		if (currentIndex !== null) {
 			const { repetitions, series } =
 				control._formValues.exercises[currentIndex] || {}
@@ -100,10 +100,6 @@ const CreateWorkoutForm = () => {
 		}
 		setModalVisible(false)
 	}
-
-	useEffect(() => {
-		console.log(errors, 'errors')
-	}, [errors])
 
 	return (
 		<View className="flex-1 p-5 pt-0 bg-gray-100">
