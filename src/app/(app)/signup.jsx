@@ -1,10 +1,12 @@
 import { auth, db } from '@/config/firebaseConfig'
+import { setUserID } from '@/store/slices/userSlice'
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useRouter } from 'expo-router'
 import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { ref, set } from 'firebase/database'
 import React, { useState } from 'react'
 import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native'
+import { useDispatch } from 'react-redux'
 
 export default function SignUpScreen() {
 	const [firstName, setFirstName] = useState('') // Campo para o primeiro nome
@@ -17,6 +19,7 @@ export default function SignUpScreen() {
 	const [showDatePicker, setShowDatePicker] = useState(false)
 
 	const router = useRouter()
+	const dispatch = useDispatch()
 
 	// Função para criar o usuário e salvar no Realtime Database
 	const handleSignUp = async () => {
@@ -42,7 +45,7 @@ export default function SignUpScreen() {
 				birthDate: birthDate.toISOString().split('T')[0], // Formata a data como AAAA-MM-DD
 			})
 
-			Alert.alert('Sucesso', 'Usuário cadastrado com sucesso!')
+			dispatch(setUserID(userId))
 			router.navigate('/tabs/home') // Navega para a tela principal do app com o ID do usuário
 		} catch (error) {
 			console.error('Erro ao cadastrar usuário:', error)

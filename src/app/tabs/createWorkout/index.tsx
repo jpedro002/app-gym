@@ -24,13 +24,13 @@ export default function CreateWorkoutScreen() {
 			/>
 			<ButtonNavigate
 				handleNavigateTo={() =>
-					handleNavigateTo('/tabs/createWorkout/createPhysicalExercise')
+					handleNavigateTo('/tabs/createWorkout/createWorkoutForm')
 				}
 				title="Criar Treino "
 			/>
 			<ButtonNavigate
 				handleNavigateTo={() =>
-					handleNavigateTo('/tabs/createWorkout/createPhysicalExercise')
+					handleNavigateTo('/tabs/createWorkout/listPhysicalExercise')
 				}
 				title="Listar exercicios"
 			/>

@@ -12,6 +12,18 @@ export default function Layout() {
 					title: 'Adicionar Exercício',
 				}}
 			/>
+			<Stack.Screen
+				name="listPhysicalExercise"
+				options={{
+					title: 'Lista de Exercícios',
+				}}
+			/>
+			<Stack.Screen
+				name="createWorkoutForm"
+				options={{
+					title: 'Criar Treino',
+				}}
+			/>
 		</Stack>
 	)
 }

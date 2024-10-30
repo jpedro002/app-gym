@@ -1,8 +1,7 @@
 import { db } from '@/config/firebaseConfig'
 import { useAppSelector } from '@/store/store'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useRouter } from 'expo-router'
-import { ref, set } from 'firebase/database'
+import { push, ref, set } from 'firebase/database'
 import { Controller, useForm } from 'react-hook-form'
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { z } from 'zod'
@@ -14,13 +13,13 @@ const signUpSchema = z.object({
 
 type SignUpFormData = z.infer<typeof signUpSchema>
 
-export default function SignUpScreen() {
+export default function CreatePhysicalExercise() {
 	const userId = useAppSelector((state) => state.user.uid)
-	const router = useRouter()
 	const {
 		control,
 		handleSubmit,
 		formState: { errors },
+		reset,
 	} = useForm<SignUpFormData>({
 		resolver: zodResolver(signUpSchema),
 		defaultValues: {
@@ -32,18 +31,19 @@ export default function SignUpScreen() {
 	const handleSignUp = async (data: SignUpFormData) => {
 		try {
 			const { videoReference, name } = data
-			const userRef = ref(db, 'exercises')
+			const exercisesRef = ref(db, `exercises/${userId}`)
+			const newExerciseRef = push(exercisesRef)
 
-			await set(userRef, {
-				uid: userId,
+			await set(newExerciseRef, {
 				videoReference,
 				name,
 			})
 
 			Alert.alert('Sucesso', 'Exercício cadastrado com sucesso!')
-			router.push('/tabs/home')
+
+			reset()
 		} catch (error) {
-			console.error('Erro ao cadastrar usuário:', error)
+			console.error('Erro ao cadastrar exercício:', error)
 			Alert.alert('Erro', 'Não foi possível realizar o cadastro')
 		}
 	}

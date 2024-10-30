@@ -22,7 +22,7 @@ export default function LoginScreen() {
 				password,
 			)
 			const userId = userCredential.user.uid // Pegando o ID do usuário para passar como parâmetro
-			Alert.alert('Sucesso', 'Login realizado com sucesso!')
+
 			dispatch(setUserID(userId))
 			router.replace('/tabs/home') // Navega para a tela principal do app com o ID do usuário
 		} catch (error) {
