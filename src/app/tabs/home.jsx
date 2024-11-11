@@ -1,7 +1,7 @@
-import { db } from '@/config/firebaseConfig' // Importa o Firebase
+import { db } from '@/config/firebaseConfig'
 import { useAppSelector } from '@/store/store'
 import { FontAwesome } from '@expo/vector-icons'
-import { get, ref } from 'firebase/database' // Importa as funções necessárias do Realtime Database
+import { get, ref } from 'firebase/database'
 import React, { useEffect, useState } from 'react'
 import {
 	ActivityIndicator,
@@ -13,6 +13,7 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native'
+import { Calendar } from 'react-native-calendars'
 import ProgressBar from 'react-native-progress/Bar'
 
 export default function HomeScreen() {
@@ -24,11 +25,11 @@ export default function HomeScreen() {
 	useEffect(() => {
 		const fetchUserData = async () => {
 			try {
-				const userRef = ref(db, `users/${userId}`) // Referência ao nó do usuário no Realtime Database
+				const userRef = ref(db, `users/${userId}`)
 				const snapshot = await get(userRef)
 
 				if (snapshot.exists()) {
-					setUserInfo(snapshot.val()) // Usa .val() para obter os dados
+					setUserInfo(snapshot.val())
 				} else {
 					console.log('No such document!')
 				}
@@ -46,17 +47,44 @@ export default function HomeScreen() {
 		return <ActivityIndicator size="large" color="red" style={{ flex: 1 }} />
 	}
 
-	// Usa firstName ao invés de name
 	const firstName = userInfo?.firstName || 'Usuário'
+	const weight = userInfo?.weight || 0
+	const height = userInfo?.height || 1
+	// Removendo a variável 'age' pois não está sendo usada no código
+	// const age = userInfo?.age || 18
+	// Removendo a variável 'gender' pois não está sendo usada no código
+	// const gender = userInfo?.gender || 'undefined'
+
+	// Cálculo do IMC
+	const bmi = weight / (height / 100) ** 2
+	const idealBmiMin = 18.5
+	const idealBmiMax = 24.9
+
+	// Definindo as faixas ideais
+	// Removendo a variável 'idealBmiRange' pois não está sendo usada no código
+	// const idealBmiRange = bmi >= idealBmiMin && bmi <= idealBmiMax
+	const bmiCategory =
+		bmi < idealBmiMin
+			? 'Abaixo do IMC ideal'
+			: bmi > idealBmiMax
+				? 'Acima do IMC ideal'
+				: 'Dentro do IMC ideal!'
+
+	const checkIns = userInfo?.checkIns || {}
+
+	const markedDates = Object.keys(checkIns).reduce((acc, date) => {
+		if (checkIns[date]) {
+			acc[date] = { selected: true, selectedColor: 'red' }
+		}
+		return acc
+	}, {})
 
 	return (
 		<ScrollView style={styles.container}>
-			{/* Título do App */}
 			<View style={styles.appTitleContainer}>
 				<Text style={styles.appTitle}>MyFitnessApp</Text>
 			</View>
 
-			{/* Foto de Perfil e Saudação */}
 			<View style={styles.profileContainer}>
 				<Image
 					source={{
@@ -66,24 +94,22 @@ export default function HomeScreen() {
 				/>
 				<Text style={styles.greeting}>Olá, {firstName}!</Text>
 
-				{/* Botão de Notificações */}
-				<TouchableOpacity onPress={() => setModalVisible(true)}>
-					<FontAwesome
-						name="bell"
-						size={24}
-						color="black"
-						style={styles.notificationIcon}
-					/>
+				{/* Botão de Notificação Atualizado */}
+				<TouchableOpacity
+					onPress={() => setModalVisible(true)}
+					style={styles.notificationContainer}
+				>
+					<FontAwesome name="bell" size={24} color="white" />
 				</TouchableOpacity>
 
-				{/* Modal de Notificações */}
+				{/* Modal de Notificações com fundo translúcido */}
 				<Modal
-					animationType="slide"
+					animationType="fade"
 					transparent={true}
 					visible={modalVisible}
 					onRequestClose={() => setModalVisible(false)}
 				>
-					<View style={styles.modalContainer}>
+					<View style={styles.modalOverlay}>
 						<View style={styles.modalContent}>
 							<Text style={styles.modalTitle}>Notificações</Text>
 							<Text style={styles.notificationText}>
@@ -100,14 +126,12 @@ export default function HomeScreen() {
 				</Modal>
 			</View>
 
-			{/* Progresso do Usuário */}
 			<View style={styles.card}>
 				<Text style={styles.sectionTitle}>Progresso Semanal</Text>
-				<ProgressBar progress={0.7} color="red" borderRadius={10} />
+				<ProgressBar progress={0.7} color="red" borderRadius={10} height={10} />
 				<Text style={styles.progressText}>70% concluído esta semana</Text>
 			</View>
 
-			{/* Treino do Dia */}
 			<View style={styles.card}>
 				<Text style={styles.sectionTitle}>Treino de Hoje</Text>
 				<Text style={styles.workoutDetail}>
@@ -115,15 +139,38 @@ export default function HomeScreen() {
 				</Text>
 			</View>
 
-			{/* Próximos Treinos (Calendário) */}
 			<View style={styles.card}>
-				<Text style={styles.sectionTitle}>Próximos Treinos</Text>
-				<Text style={styles.workoutDetail}>
-					Treino 1: {userInfo?.upcomingWorkouts?.[0] || 'N/A'}
-				</Text>
-				<Text style={styles.workoutDetail}>
-					Treino 2: {userInfo?.upcomingWorkouts?.[1] || 'N/A'}
-				</Text>
+				<Text style={styles.sectionTitle}>IMC Atual</Text>
+				<Text style={styles.bmiValue}>IMC: {bmi.toFixed(1)}</Text>
+				<Text style={styles.bmiInfo}>{bmiCategory}</Text>
+
+				<View style={styles.bmiProgressContainer}>
+					<View style={styles.bmiBarBackground} />
+					<View
+						style={[
+							styles.idealBmiRange,
+							{
+								left: `${(idealBmiMin / 40) * 100}%`,
+								width: `${((idealBmiMax - idealBmiMin) / 40) * 100}%`,
+							},
+						]}
+					/>
+					<View style={[styles.bmiMarker, { left: `${(bmi / 40) * 100}%` }]} />
+				</View>
+			</View>
+
+			<View style={styles.card}>
+				<Text style={styles.sectionTitle}>Calendário de Treinos</Text>
+				<Calendar
+					markedDates={markedDates}
+					theme={{
+						arrowColor: 'red',
+						todayTextColor: 'red',
+						selectedDayBackgroundColor: 'red',
+						selectedDayTextColor: 'white',
+						monthTextColor: 'black',
+					}}
+				/>
 			</View>
 		</ScrollView>
 	)
@@ -161,8 +208,47 @@ const styles = StyleSheet.create({
 		marginLeft: 15,
 		flex: 1,
 	},
-	notificationIcon: {
+	notificationContainer: {
+		backgroundColor: '#ff6347', // fundo chamativo
+		padding: 8,
+		borderRadius: 20,
+		alignItems: 'center',
+		justifyContent: 'center',
 		marginLeft: 'auto',
+	},
+	modalOverlay: {
+		flex: 1,
+		backgroundColor: 'rgba(0, 0, 0, 0.5)', // fundo translúcido
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	modalContent: {
+		width: '80%',
+		backgroundColor: 'white',
+		padding: 20,
+		borderRadius: 10,
+		alignItems: 'center',
+	},
+	modalTitle: {
+		fontSize: 20,
+		fontWeight: 'bold',
+		marginBottom: 10,
+	},
+	notificationText: {
+		fontSize: 16,
+		color: 'gray',
+		marginBottom: 20,
+		textAlign: 'center',
+	},
+	closeModalButton: {
+		backgroundColor: '#ff6347',
+		paddingVertical: 10,
+		paddingHorizontal: 20,
+		borderRadius: 5,
+	},
+	closeModalButtonText: {
+		color: 'white',
+		fontWeight: 'bold',
 	},
 	card: {
 		padding: 20,
@@ -179,46 +265,53 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 	},
 	progressText: {
-		marginTop: 5,
 		fontSize: 16,
 		color: 'gray',
+		marginTop: 10,
 	},
 	workoutDetail: {
 		fontSize: 16,
 		color: 'gray',
-		marginBottom: 5,
+		marginTop: 10,
 	},
-	modalContainer: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: 'rgba(0, 0, 0, 0.5)',
-	},
-	modalContent: {
-		width: 300,
-		backgroundColor: 'white',
-		borderRadius: 10,
-		padding: 20,
-		alignItems: 'center',
-	},
-	modalTitle: {
-		fontSize: 20,
+	bmiValue: {
+		fontSize: 22,
+		color: '#ff0000',
 		fontWeight: 'bold',
-		marginBottom: 10,
 	},
-	notificationText: {
+	bmiInfo: {
 		fontSize: 16,
-		marginBottom: 20,
+		color: 'gray',
+		marginTop: 5,
 	},
-	closeModalButton: {
-		backgroundColor: 'red',
-		borderRadius: 5,
-		padding: 10,
-		alignItems: 'center',
+	bmiProgressContainer: {
 		width: '100%',
+		height: 10,
+		backgroundColor: '#d3d3d3',
+		borderRadius: 5,
+		marginTop: 15,
+		overflow: 'hidden',
+		position: 'relative',
 	},
-	closeModalButtonText: {
-		color: 'white',
-		fontWeight: 'bold',
+	bmiBarBackground: {
+		width: '100%',
+		height: 10,
+		backgroundColor: '#d3d3d3',
+		position: 'absolute',
+		top: 0,
+	},
+	idealBmiRange: {
+		position: 'absolute',
+		top: 0,
+		height: 10,
+		backgroundColor: '#ff6347',
+	},
+	bmiMarker: {
+		position: 'absolute',
+		top: 0,
+		width: 10,
+		height: 10,
+		borderRadius: 5,
+		backgroundColor: '#000',
 	},
 })
