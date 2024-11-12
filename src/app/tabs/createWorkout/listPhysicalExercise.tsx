@@ -21,7 +21,7 @@ export default function ListPhysicalExercise() {
 		)
 	}
 	return (
-		<View className="flex-1 bg-gray-100 p-5">
+		<View className="flex-1 bg-gray-100 p-5 gap-4">
 			{loading ? (
 				<Text className="text-gray-500 text-center">Carregando...</Text>
 			) : error ? (
@@ -37,14 +37,14 @@ export default function ListPhysicalExercise() {
 					renderItem={({ item }) => (
 						<ExerciseItem
 							name={item.name}
-							onPress={() => handleVideoPress(item.videoReference)} // Função anônima
+							onPress={() => handleVideoPress(item.videoReference)}
 						/>
 					)}
 					contentContainerStyle={{ paddingBottom: 20 }}
 				/>
 			)}
 			<TouchableOpacity
-				className="bg-red-500 rounded-lg p-4 absolute bottom-5 left-5 right-5"
+				className="bg-red-500 rounded-lg p-4 "
 				onPress={() =>
 					router.push('/tabs/createWorkout/createPhysicalExercise')
 				}

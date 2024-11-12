@@ -4,6 +4,7 @@ interface Exercise {
 	id: string
 	name: string
 	videoReference: string
+	category?: string
 }
 
 interface ExerciseState {

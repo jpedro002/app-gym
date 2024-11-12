@@ -7,6 +7,7 @@ import {
 	useFonts,
 } from '@expo-google-fonts/roboto'
 import { ActivityIndicator, View } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 export default function LayoutMain() {
 	const [fontsLoaded] = useFonts({
@@ -24,7 +25,9 @@ export default function LayoutMain() {
 
 	return (
 		<ReduxProvider>
-			<Slot />
+			<GestureHandlerRootView>
+				<Slot />
+			</GestureHandlerRootView>
 		</ReduxProvider>
 	)
 }

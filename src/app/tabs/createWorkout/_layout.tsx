@@ -24,6 +24,18 @@ export default function Layout() {
 					title: 'Criar Treino',
 				}}
 			/>
+			<Stack.Screen
+				name="listWorkouts"
+				options={{
+					title: 'Listar Treinos',
+				}}
+			/>
+			<Stack.Screen
+				name="[workoutID]/index"
+				options={{
+					title: 'Listar Treinos',
+				}}
+			/>
 		</Stack>
 	)
 }

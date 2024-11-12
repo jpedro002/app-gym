@@ -1,9 +1,8 @@
-// ExerciseItem.tsx
 import { Text, TouchableOpacity, View } from 'react-native'
 
 interface ExerciseItemProps {
 	name: string
-	onPress: () => void // Função sem parâmetros
+	onPress: () => void
 }
 
 export const ExerciseItem = ({ name, onPress }: ExerciseItemProps) => {

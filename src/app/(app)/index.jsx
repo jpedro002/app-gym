@@ -3,7 +3,14 @@ import { setUserID } from '@/store/slices/userSlice'
 import { Link, useRouter } from 'expo-router'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import React, { useState } from 'react'
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import {
+	Alert,
+	Pressable,
+	StyleSheet,
+	Text,
+	TextInput,
+	View,
+} from 'react-native'
 import { useDispatch } from 'react-redux'
 
 export default function LoginScreen() {

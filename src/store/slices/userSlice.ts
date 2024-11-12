@@ -37,7 +37,6 @@ const userSlice = createSlice({
 		},
 		setLoading: (state, action: PayloadAction<boolean>) => {
 			state.loading = action.payload
-			console.log('loading', action.payload)
 		},
 		clearUser: (state) => {
 			state.email = ''

@@ -1,4 +1,5 @@
 import { db } from '@/config/firebaseConfig'
+import { useFetchMarkedDates } from '@/hooks/useFetchMarkedDates'
 import { useAppSelector } from '@/store/store'
 import { FontAwesome } from '@expo/vector-icons'
 import { get, ref } from 'firebase/database'
@@ -22,6 +23,7 @@ export default function HomeScreen() {
 	const [userInfo, setUserInfo] = useState(null)
 	const [loading, setLoading] = useState(true)
 	const [modalVisible, setModalVisible] = useState(false)
+	const markedDates = useFetchMarkedDates()
 
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -66,15 +68,6 @@ export default function HomeScreen() {
 			: bmi > idealBmiMax
 				? 'Acima do IMC ideal'
 				: 'Dentro do IMC ideal!'
-
-	const checkIns = userInfo?.checkIns || {}
-
-	const markedDates = Object.keys(checkIns).reduce((acc, date) => {
-		if (checkIns[date]) {
-			acc[date] = { selected: true, selectedColor: 'red' }
-		}
-		return acc
-	}, {})
 
 	return (
 		<ScrollView style={styles.container}>

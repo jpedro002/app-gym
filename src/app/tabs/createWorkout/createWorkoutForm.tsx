@@ -17,6 +17,7 @@ import { z } from 'zod'
 
 const workoutSchema = z.object({
 	workoutName: z.string().min(1, 'Nome do treino é obrigatório'),
+	thumbUrl: z.string().optional(),
 	exercises: z
 		.array(
 			z.object({
@@ -50,6 +51,7 @@ const CreateWorkoutForm = () => {
 		resolver: zodResolver(workoutSchema),
 		defaultValues: {
 			workoutName: '',
+			thumbUrl: '',
 			exercises: [
 				{ repetitions: '', series: '', name: '', videoReference: '' },
 			],
@@ -66,12 +68,13 @@ const CreateWorkoutForm = () => {
 
 	const onSubmit = async (data: WorkoutFormData) => {
 		try {
-			const { workoutName, exercises } = data
+			const { workoutName, exercises, thumbUrl } = data
 			const workoutsRef = ref(db, `workouts/${userId}`)
 			const newWorkoutRef = push(workoutsRef)
 
 			await set(newWorkoutRef, {
 				workoutName,
+				thumbUrl,
 				exercises,
 			})
 
@@ -91,6 +94,7 @@ const CreateWorkoutForm = () => {
 		if (currentIndex !== null) {
 			const { repetitions, series } =
 				control._formValues.exercises[currentIndex] || {}
+
 			update(currentIndex, {
 				repetitions,
 				series,
@@ -122,6 +126,21 @@ const CreateWorkoutForm = () => {
 					{errors.workoutName && (
 						<Text className="text-red-500">{errors.workoutName.message}</Text>
 					)}
+
+					<Controller
+						control={control}
+						name="thumbUrl"
+						render={({ field: { onChange, onBlur, value } }) => (
+							<TextInput
+								className="bg-white p-2 rounded-lg mb-2 text-base"
+								onBlur={onBlur}
+								onChangeText={onChange}
+								value={value}
+								placeholder="URL da imagem de capa"
+								keyboardType="url"
+							/>
+						)}
+					/>
 
 					{fields.map((item, index) => (
 						<View

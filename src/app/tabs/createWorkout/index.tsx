@@ -36,7 +36,7 @@ export default function CreateWorkoutScreen() {
 			/>
 			<ButtonNavigate
 				handleNavigateTo={() =>
-					handleNavigateTo('/tabs/createWorkout/createPhysicalExercise')
+					handleNavigateTo('/tabs/createWorkout/listWorkouts')
 				}
 				title="Listar treinos"
 			/>
