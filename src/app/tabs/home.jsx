@@ -17,6 +17,7 @@ import { Calendar } from 'react-native-calendars'
 import ProgressBar from 'react-native-progress/Bar'
 
 export default function HomeScreen() {
+	// Obtendo o userId do estado global via Redux (useAppSelector)
 	const userId = useAppSelector((state) => state.user.uid)
 	const [userInfo, setUserInfo] = useState(null)
 	const [loading, setLoading] = useState(true)
@@ -25,11 +26,12 @@ export default function HomeScreen() {
 	useEffect(() => {
 		const fetchUserData = async () => {
 			try {
+				// Consultando dados do usuário no Firebase com o userId
 				const userRef = ref(db, `users/${userId}`)
 				const snapshot = await get(userRef)
 
 				if (snapshot.exists()) {
-					setUserInfo(snapshot.val())
+					setUserInfo(snapshot.val()) // Definindo as informações do usuário
 				} else {
 					console.log('No such document!')
 				}
@@ -40,29 +42,24 @@ export default function HomeScreen() {
 			}
 		}
 
+		// Carregando os dados do usuário quando o component for montado
 		fetchUserData()
 	}, [userId])
 
 	if (loading) {
+		// Exibindo indicador de carregamento enquanto os dados do usuário não são carregados
 		return <ActivityIndicator size="large" color="red" style={{ flex: 1 }} />
 	}
 
 	const firstName = userInfo?.firstName || 'Usuário'
 	const weight = userInfo?.weight || 0
 	const height = userInfo?.height || 1
-	// Removendo a variável 'age' pois não está sendo usada no código
-	// const age = userInfo?.age || 18
-	// Removendo a variável 'gender' pois não está sendo usada no código
-	// const gender = userInfo?.gender || 'undefined'
 
 	// Cálculo do IMC
 	const bmi = weight / (height / 100) ** 2
 	const idealBmiMin = 18.5
 	const idealBmiMax = 24.9
 
-	// Definindo as faixas ideais
-	// Removendo a variável 'idealBmiRange' pois não está sendo usada no código
-	// const idealBmiRange = bmi >= idealBmiMin && bmi <= idealBmiMax
 	const bmiCategory =
 		bmi < idealBmiMin
 			? 'Abaixo do IMC ideal'
@@ -267,51 +264,44 @@ const styles = StyleSheet.create({
 	progressText: {
 		fontSize: 16,
 		color: 'gray',
-		marginTop: 10,
-	},
-	workoutDetail: {
-		fontSize: 16,
-		color: 'gray',
-		marginTop: 10,
+		marginTop: 5,
 	},
 	bmiValue: {
-		fontSize: 22,
-		color: '#ff0000',
+		fontSize: 24,
 		fontWeight: 'bold',
+		color: 'red',
+		marginBottom: 10,
 	},
 	bmiInfo: {
 		fontSize: 16,
 		color: 'gray',
-		marginTop: 5,
 	},
 	bmiProgressContainer: {
-		width: '100%',
-		height: 10,
-		backgroundColor: '#d3d3d3',
-		borderRadius: 5,
-		marginTop: 15,
-		overflow: 'hidden',
 		position: 'relative',
+		height: 10,
+		backgroundColor: '#e0e0e0',
+		marginTop: 10,
 	},
 	bmiBarBackground: {
-		width: '100%',
-		height: 10,
-		backgroundColor: '#d3d3d3',
 		position: 'absolute',
 		top: 0,
+		left: 0,
+		right: 0,
+		height: 10,
+		backgroundColor: '#e0e0e0',
 	},
 	idealBmiRange: {
 		position: 'absolute',
 		top: 0,
 		height: 10,
-		backgroundColor: '#ff6347',
+		backgroundColor: '#90ee90',
 	},
 	bmiMarker: {
 		position: 'absolute',
 		top: 0,
 		width: 10,
 		height: 10,
+		backgroundColor: 'red',
 		borderRadius: 5,
-		backgroundColor: '#000',
 	},
 })

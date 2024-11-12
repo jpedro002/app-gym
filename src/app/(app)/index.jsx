@@ -3,7 +3,7 @@ import { setUserID } from '@/store/slices/userSlice'
 import { Link, useRouter } from 'expo-router'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import React, { useState } from 'react'
-import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { useDispatch } from 'react-redux'
 
 export default function LoginScreen() {
@@ -36,7 +36,7 @@ export default function LoginScreen() {
 
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>Login</Text>
+			<Text style={styles.title}>Bem-vindo!</Text>
 
 			<TextInput
 				style={styles.input}
@@ -44,6 +44,7 @@ export default function LoginScreen() {
 				keyboardType="email-address"
 				value={email}
 				onChangeText={setEmail}
+				placeholderTextColor="#888"
 			/>
 
 			<TextInput
@@ -52,16 +53,17 @@ export default function LoginScreen() {
 				secureTextEntry
 				value={password}
 				onChangeText={setPassword}
+				placeholderTextColor="#888"
 			/>
 
-			<Button title="Entrar" onPress={handleLogin} color="red" />
+			<Pressable onPress={handleLogin} style={styles.loginButton}>
+				<Text style={styles.loginButtonText}>Entrar</Text>
+			</Pressable>
 
 			<Link href={'/(app)/signup'} asChild>
-				<Button
-					title="Criar Conta"
-					// onPress={() => navigation.navigate('SignUpScreen')} // Corrigido para "Register"
-					color="gray"
-				/>
+				<Pressable style={styles.registerButton}>
+					<Text style={styles.registerButtonText}>Criar Conta</Text>
+				</Pressable>
 			</Link>
 		</View>
 	)
@@ -70,6 +72,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		justifyContent: 'center',
 		padding: 20,
 		backgroundColor: '#f0f0f0',
 	},
@@ -78,13 +81,40 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 		color: 'red',
 		textAlign: 'center',
-		marginBottom: 20,
+		marginBottom: 30,
 	},
 	input: {
 		backgroundColor: '#fff',
-		padding: 10,
-		borderRadius: 8,
-		marginBottom: 10,
+		padding: 15,
+		borderRadius: 10,
+		marginBottom: 15,
+		fontSize: 16,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.2,
+		shadowRadius: 3,
+	},
+	loginButton: {
+		backgroundColor: 'red',
+		paddingVertical: 15,
+		borderRadius: 10,
+		alignItems: 'center',
+		marginBottom: 20,
+	},
+	loginButtonText: {
+		color: 'white',
+		fontWeight: 'bold',
+		fontSize: 16,
+	},
+	registerButton: {
+		paddingVertical: 15,
+		borderRadius: 10,
+		alignItems: 'center',
+		backgroundColor: '#d3d3d3',
+	},
+	registerButtonText: {
+		color: 'gray',
+		fontWeight: 'bold',
 		fontSize: 16,
 	},
 })
