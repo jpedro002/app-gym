@@ -39,7 +39,7 @@ export default function CreatePhysicalExercise() {
 
 	const handleSignUp = async (data: SignUpFormData) => {
 		try {
-			const { videoReference, name } = data
+			const { videoReference, name, category } = data
 			const exercisesRef = ref(db, `exercises/${userId}`)
 			const newExerciseRef = push(exercisesRef)
 

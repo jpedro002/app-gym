@@ -4,6 +4,7 @@ import {
 	Button,
 	FlatList,
 	Modal,
+	ScrollView,
 	Text,
 	TextInput,
 	TouchableOpacity,
@@ -21,8 +22,15 @@ export const ModalSelectExerciseToCreateWorkout = ({
 	handleExerciseSelect,
 	setModalVisible,
 }: ModalSelectExerciseToCreateWorkoutProps) => {
-	const { exercises, loading, error } = useFetchExercises()
+	const { exercises, loading, error, fetchExercises, categories } =
+		useFetchExercises()
 	const [searchQuery, setSearchQuery] = useState('')
+	const [selectedCategory, setSelectedCategory] = useState('criados')
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		fetchExercises(selectedCategory)
+	}, [selectedCategory])
 
 	const filteredExercises = exercises.filter((exercise) =>
 		exercise.name.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -49,6 +57,39 @@ export const ModalSelectExerciseToCreateWorkout = ({
 						value={searchQuery}
 						onChangeText={setSearchQuery}
 					/>
+
+					{/* ScrollView para categorias */}
+					{loading ? (
+						<Text className="text-center text-gray-500">Carregando...</Text>
+					) : (
+						<ScrollView horizontal className="h-28">
+							<View className="flex-row gap-4">
+								{categories && categories.length > 0 ? (
+									categories.map((category, index) => (
+										<TouchableOpacity
+											// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+											key={index}
+											className={`p-2 border h-16 items-center justify-center border-gray-300 rounded-md ${selectedCategory === category ? 'bg-gray-200' : ''}`}
+											onPress={() => setSelectedCategory(category)}
+										>
+											<Text>{category}</Text>
+										</TouchableOpacity>
+									))
+								) : (
+									<Text className="text-center text-gray-500">
+										Nenhuma categoria encontrada.
+									</Text>
+								)}
+								{/* Opção para "Criados" */}
+								<TouchableOpacity
+									className={`p-2 border h-16 items-center justify-center border-gray-300 rounded-md ${selectedCategory === 'criados' ? 'bg-gray-200' : ''}`}
+									onPress={() => setSelectedCategory('criados')}
+								>
+									<Text>Criados</Text>
+								</TouchableOpacity>
+							</View>
+						</ScrollView>
+					)}
 
 					{loading ? (
 						<Text className="text-center text-gray-500">Carregando...</Text>

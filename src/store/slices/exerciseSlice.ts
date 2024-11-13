@@ -1,4 +1,4 @@
-import { type PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
 interface Exercise {
 	id: string
@@ -11,12 +11,14 @@ interface ExerciseState {
 	exercises: Exercise[]
 	loading: boolean
 	error: string | null
+	categories: string[]
 }
 
 const initialState: ExerciseState = {
 	exercises: [],
 	loading: false,
 	error: null,
+	categories: [],
 }
 
 const exerciseSlice = createSlice({
@@ -42,6 +44,9 @@ const exerciseSlice = createSlice({
 			state.exercises = []
 			state.error = null
 		},
+		setCategories(state, action: PayloadAction<string[]>) {
+			state.categories = action.payload
+		},
 	},
 })
 
@@ -51,6 +56,7 @@ export const {
 	setLoading,
 	setError,
 	clearExercises,
+	setCategories,
 } = exerciseSlice.actions
 
 export default exerciseSlice.reducer
